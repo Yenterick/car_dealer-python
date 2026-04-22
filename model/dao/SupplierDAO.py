@@ -23,3 +23,41 @@ class SupplierDAO:
     @staticmethod
     def delete_supplier(id: int) -> None:
         Supplier.delete_by_id(id)
+
+    @staticmethod
+    def insert_supplier(connection: Sqlite3Connection,
+                        supplier: SupplierVO) -> int | None:
+        # TODO: Implement query string
+        query_string: str = ''
+
+        cursor: Cursor = connection.cursor(query_string,
+                                           (
+                                                supplier.name,
+                                                supplier.email,
+                                                supplier.phone
+                                           ))
+
+        supplier_id = cursor.lastrowid
+        return supplier_id
+    
+    @staticmethod
+    def reinsert_supplier(connection: Sqlite3Connection, 
+                          supplier: SupplierVO) -> int | None:
+        # TODO: Implement query string
+        query_string: str = ''
+
+        cursor: Cursor = connection.cursor(query_string,
+                                           (    
+                                                supplier.supplier_id,
+                                                supplier.name,
+                                                supplier.email,
+                                                supplier.phone
+                                           ))
+
+        supplier_id = cursor.lastrowid
+        return supplier_id
+    
+    
+
+
+

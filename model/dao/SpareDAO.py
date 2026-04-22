@@ -23,3 +23,18 @@ class SpareDAO:
     @staticmethod
     def delete_spare(id: int) -> None:
         Spare.delete_by_id(id)
+
+    @staticmethod
+    def insert_spare(connection: Sqlite3Connection,
+                     spare: SpareVO,
+                     supplier_id: int) -> int | None:
+        # TODO: Implement query string
+        query_string: str = ''
+
+        cursor: Cursor = connection.cursor(query_string,
+                                           (
+                                                spare.name,
+                                                spare.type,
+                                                supplier_id
+                                           ))
+        

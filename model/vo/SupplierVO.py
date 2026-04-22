@@ -7,4 +7,4 @@ class SupplierVO:
     name: str
     email: str
     phone: str
-    created_at: datetime = field(default=datetime.now)
+    created_at: datetime = field(default=datetime.now())

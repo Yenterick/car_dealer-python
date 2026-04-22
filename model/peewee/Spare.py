@@ -1,4 +1,4 @@
-from peewee import *
+from peewee import * # type: ignore
 
 # Project imports
 from model.peewee.BaseModel import BaseModel

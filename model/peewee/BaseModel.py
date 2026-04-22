@@ -1,4 +1,4 @@
-from peewee import *
+from peewee import * # type: ignore
 from datetime import datetime
 
 db = SqliteDatabase("...")

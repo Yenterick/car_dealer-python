@@ -23,3 +23,40 @@ class CarDAO:
     @staticmethod
     def delete_car(id: int) -> None:
         Car.delete_by_id(id)
+
+    @staticmethod
+    def insert_car(connection: Sqlite3Connection,
+                   car: CarVO,
+                   supplier_id: int) -> int | None:
+        # TODO: Implemente query string
+        query_string: str = ''
+
+        cursor: Cursor = connection.cursor(query_string,
+                                           (
+                                                car.model,
+                                                car.year,
+                                                car.type,
+                                                supplier_id 
+                                           ))
+        
+        car_id = cursor.lastrowid
+        return car_id
+    
+    @staticmethod
+    def reinsert_car(connection: Sqlite3Connection,
+                   car: CarVO,
+                   supplier_id: int) -> int | None:
+        # TODO: Implemente query string
+        query_string: str = ''
+
+        cursor: Cursor = connection.cursor(query_string,
+                                           (    
+                                                car.car_id,
+                                                car.model,
+                                                car.year,
+                                                car.type,
+                                                supplier_id 
+                                           ))
+        
+        car_id = cursor.lastrowid
+        return car_id
