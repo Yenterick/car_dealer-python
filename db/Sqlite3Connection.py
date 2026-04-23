@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Connection
-from typing import Optional, Any
+from typing import Any
 
 # Project imports
 from ui.consoleUtils import log
@@ -10,13 +10,10 @@ class Sqlite3Connection:
 
     def __init__(self, db_path: str='./'):
         self.db_path = db_path
-        self.connection: Optional[Connection] = None
+        self.connection: Connection | None = None
 
     # What it will do when being loaded with "with"
-    def __enter__(self) -> Connection | None:
-        if self.connection is None:
-            return 
-
+    def __enter__(self) -> Connection:
         self.connection = sqlite3.connect(self.db_path)
         self.connection.row_factory = sqlite3.Row
 
@@ -46,4 +43,6 @@ class Sqlite3Connection:
         return False
     
     def __getattr__(self, name) -> Any:
+        if self.connection is None:
+            raise AttributeError("Connection not initialized")
         return getattr(self.connection, name)

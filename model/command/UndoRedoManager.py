@@ -22,3 +22,8 @@ class UndoRedoManager:
         if not self.undo_stack:
             return None
         return self.undo_stack.pop()
+    
+    def get_redo(self) -> None | Command:
+        if not self.redo_stack:
+            return None
+        return self.redo_stack.pop()

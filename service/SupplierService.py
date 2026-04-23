@@ -7,7 +7,10 @@ from model.vo.SupplierVO import SupplierVO
 from model.dao.SupplierDAO import SupplierDAO
 
 from model.command.UndoRedoManager import UndoRedoManager
-from model.command.supplier import InsertSupplier, DeleteSupplier
+from model.command.supplier.InsertSupplier import InsertSupplier
+from model.command.supplier.DeleteSupplier import DeleteSupplier
+
+from ui.consoleUtils import log
 
 class SupplierService:
 
@@ -22,5 +25,44 @@ class SupplierService:
     
     def get_supplier(self, supplier_id: int) -> SupplierVO | None:
         return SupplierDAO.get_supplier(supplier_id)
-    
-    
+
+    def insert_supplier(self, 
+                        supplier: SupplierVO):
+        command = InsertSupplier(supplier)
+
+        with self.connection:
+            command.redo(self.connection)
+
+        self.undo_manager.register(command)
+
+    def delete_supplier(self,
+                        supplier: SupplierVO) -> None:
+        command = DeleteSupplier(supplier)
+
+        with self.connection:
+            command.redo(self.connection)
+
+        self.undo_manager.push_redo(command)
+
+    def undo(self) -> None:
+        command = self.undo_manager.get_undo()
+        if command is None:
+            log("There's nothing to undo.")
+            return
+        
+        with self.connection:
+            command.undo(self.connection)
+
+        self.undo_manager.push_redo(command)
+        
+    def redo(self) -> None:
+        command = self.undo_manager.get_redo()
+        if command is None:
+            log("There's nothing to redo.")
+            return
+        
+        with self.connection:
+            command.redo(self.connection)
+
+        self.undo_manager.push_undo(command)
+
