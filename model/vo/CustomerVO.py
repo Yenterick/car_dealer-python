@@ -3,7 +3,7 @@ from datetime import datetime
 
 @dataclass
 class CustomerVO:
-    customer_id: int
+    customer_id: int | None
     dni: str
     name: str
     last_name: str

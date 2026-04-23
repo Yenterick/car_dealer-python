@@ -8,7 +8,7 @@ from model.vo.SpareVO import SpareVO
 
 @dataclass
 class BuyVO:
-    buy_id: int
+    buy_id: int | None
     supplier: SupplierVO
     car: CarVO | None
     spare: SpareVO | None

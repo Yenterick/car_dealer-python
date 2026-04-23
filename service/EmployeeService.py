@@ -44,24 +44,4 @@ class EmployeeService:
 
         self.undo_manager.push_redo(command)
 
-    def undo(self) -> None:
-        command = self.undo_manager.get_undo()
-        if command is None:
-            log("There's nothing to undo.")
-            return
-        
-        with self.connection:
-            command.undo(self.connection)
 
-        self.undo_manager.push_redo(command)
-        
-    def redo(self) -> None:
-        command = self.undo_manager.get_redo()
-        if command is None:
-            log("There's nothing to redo.")
-            return
-        
-        with self.connection:
-            command.redo(self.connection)
-
-        self.undo_manager.push_undo(command)

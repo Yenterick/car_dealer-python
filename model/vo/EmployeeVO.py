@@ -3,7 +3,7 @@ from datetime import datetime
 
 @dataclass
 class EmployeeVO:
-    employee_id: int
+    employee_id: int | None
     dni: str
     name: str
     last_name: str

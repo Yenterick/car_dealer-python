@@ -6,7 +6,7 @@ from model.vo.SupplierVO import SupplierVO
 
 @dataclass
 class CarVO:
-    car_id: int
+    car_id: int | None
     model: str
     year: int
     type: str

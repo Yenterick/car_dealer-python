@@ -6,7 +6,7 @@ from model.vo.SupplierVO import SupplierVO
 
 @dataclass
 class SpareVO:
-    spare_id: int
+    spare_id: int | None
     name: str
     type: str
     supplier: SupplierVO

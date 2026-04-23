@@ -9,7 +9,7 @@ from model.vo.EmployeeVO import EmployeeVO
 
 @dataclass
 class SaleVO:
-    sale_id: int
+    sale_id: int | None
     customer: CustomerVO
     car: CarVO | None
     spare: SpareVO | None
