@@ -23,3 +23,36 @@ class CustomerDAO:
     @staticmethod
     def delete_customer(id: int) -> None:
         Customer.delete_by_id(id)
+
+    @staticmethod
+    def insert_customer(connection: Sqlite3Connection,
+                        customer: CustomerVO) -> int | None:
+   
+        query_string: str = 'INSERT INTO customer (dni, name, last_name) VALUES (?, ?, ?)'
+
+        cursor: Cursor = connection.execute(query_string,
+                                           (
+                                                customer.dni,
+                                                customer.name,
+                                                customer.last_name
+                                           ))
+        
+        customer_id = cursor.lastrowid
+        return customer_id
+    
+    @staticmethod
+    def reinsert_customer(connection: Sqlite3Connection,
+                          customer: CustomerVO) -> int | None:
+
+        query_string: str = 'INSERT INTO customer (customer_id, dni, name, last_name) VALUES (?, ?, ?, ?)'
+
+        cursor: Cursor = connection.execute(query_string,
+                                           (    
+                                                customer.customer_id,
+                                                customer.dni,
+                                                customer.name,
+                                                customer.last_name
+                                           ))
+        
+        customer_id = cursor.lastrowid
+        return customer_id

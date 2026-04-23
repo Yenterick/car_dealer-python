@@ -28,13 +28,33 @@ class SpareDAO:
     def insert_spare(connection: Sqlite3Connection,
                      spare: SpareVO,
                      supplier_id: int) -> int | None:
-        # TODO: Implement query string
-        query_string: str = ''
 
-        cursor: Cursor = connection.cursor(query_string,
+        query_string: str = 'INSERT INTO spare (name, type, supplier_id) VALUES (?, ?, ?)'
+
+        cursor: Cursor = connection.execute(query_string,
                                            (
                                                 spare.name,
                                                 spare.type,
                                                 supplier_id
                                            ))
         
+        spare_id = cursor.lastrowid
+        return spare_id
+    
+    @staticmethod
+    def reinsert_spare(connection: Sqlite3Connection,
+                       spare: SpareVO,
+                       supplier_id: int) -> int | None:
+
+        query_string: str = 'INSERT INTO spare (spare_id, name, type, supplier_id) VALUES (?, ?, ?, ?)'
+
+        cursor: Cursor = connection.execute(query_string,
+                                           (    
+                                                spare.spare_id,
+                                                spare.name,
+                                                spare.type,
+                                                supplier_id
+                                           ))
+        
+        spare_id = cursor.lastrowid
+        return spare_id

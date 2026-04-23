@@ -28,10 +28,10 @@ class CarDAO:
     def insert_car(connection: Sqlite3Connection,
                    car: CarVO,
                    supplier_id: int) -> int | None:
-        # TODO: Implemente query string
-        query_string: str = ''
 
-        cursor: Cursor = connection.cursor(query_string,
+        query_string: str = 'INSERT INTO car (model, year, type, supplier_id) VALUES (?, ?, ?, ?)'
+
+        cursor: Cursor = connection.execute(query_string,
                                            (
                                                 car.model,
                                                 car.year,
@@ -46,10 +46,10 @@ class CarDAO:
     def reinsert_car(connection: Sqlite3Connection,
                    car: CarVO,
                    supplier_id: int) -> int | None:
-        # TODO: Implemente query string
-        query_string: str = ''
+ 
+        query_string: str = 'INSERT INTO car (car_id, model, year, type, supplier_id) VALUES (?, ?, ?, ?, ?)'
 
-        cursor: Cursor = connection.cursor(query_string,
+        cursor: Cursor = connection.execute(query_string,
                                            (    
                                                 car.car_id,
                                                 car.model,

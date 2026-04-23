@@ -27,10 +27,10 @@ class SupplierDAO:
     @staticmethod
     def insert_supplier(connection: Sqlite3Connection,
                         supplier: SupplierVO) -> int | None:
-        # TODO: Implement query string
-        query_string: str = ''
+   
+        query_string: str = 'INSERT INTO supplier (name, email, phone) VALUES (?, ?, ?)'
 
-        cursor: Cursor = connection.cursor(query_string,
+        cursor: Cursor = connection.execute(query_string,
                                            (
                                                 supplier.name,
                                                 supplier.email,
@@ -43,10 +43,10 @@ class SupplierDAO:
     @staticmethod
     def reinsert_supplier(connection: Sqlite3Connection, 
                           supplier: SupplierVO) -> int | None:
-        # TODO: Implement query string
-        query_string: str = ''
+   
+        query_string: str = 'INSERT INTO supplier (supplier_id, name, email, phone) VALUES (?, ?, ?, ?)'
 
-        cursor: Cursor = connection.cursor(query_string,
+        cursor: Cursor = connection.execute(query_string,
                                            (    
                                                 supplier.supplier_id,
                                                 supplier.name,
