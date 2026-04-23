@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 from sqlite3 import Cursor
 
 # Project imports
@@ -14,21 +14,53 @@ from model.peewee.Car import Car
 class CarDAO:
 
     @staticmethod
-    def get_all_cars() -> List[Car]:
-        return Car.select()
+    def get_all_cars() -> List[CarVO]:
+        peewee_cars = Car.select()
+        cars = []
+        for peewee_car in peewee_cars:
+            supplier_vo = SupplierVO(
+                supplier_id=peewee_car.supplier_id.supplier_id,
+                name=peewee_car.supplier_id.name,
+                email=peewee_car.supplier_id.email,
+                phone=peewee_car.supplier_id.phone
+            )
+            cars.append(CarVO(
+                car_id=peewee_car.car_id,
+                model=peewee_car.model,
+                year=peewee_car.year,
+                type=peewee_car.type,
+                supplier=supplier_vo
+            ))
+        return cars
     
     @staticmethod
-    def get_car(id: int) -> Car:
-        return Car.get_by_id(id)
+    def get_car(id: int) -> CarVO | None:
+        peewee_car = Car.get_or_none(id)
+        
+        if peewee_car is None:
+            return None
+
+        supplier_vo = SupplierVO(
+            supplier_id=peewee_car.supplier_id.supplier_id,
+            name=peewee_car.supplier_id.name,
+            email=peewee_car.supplier_id.email,
+            phone=peewee_car.supplier_id.phone
+        )
+        return CarVO(
+            car_id=peewee_car.car_id,
+            model=peewee_car.model,
+            year=peewee_car.year,
+            type=peewee_car.type,
+            supplier=supplier_vo
+        )
     
     @staticmethod
-    def delete_car(id: int) -> None:
+    def delete_car(id: int | None) -> None:
         Car.delete_by_id(id)
 
     @staticmethod
     def insert_car(connection: Sqlite3Connection,
-                   car: CarVO,
-                   supplier_id: int) -> int | None:
+                   car: CarVO) -> int | None:
 
         query_string: str = 'INSERT INTO car (model, year, type, supplier_id) VALUES (?, ?, ?, ?)'
 
@@ -37,7 +69,7 @@ class CarDAO:
                                                 car.model,
                                                 car.year,
                                                 car.type,
-                                                supplier_id 
+                                                car.supplier.supplier_id 
                                            ))
         
         car_id = cursor.lastrowid
@@ -45,8 +77,7 @@ class CarDAO:
     
     @staticmethod
     def reinsert_car(connection: Sqlite3Connection,
-                     car: CarVO,
-                     supplier_id: int) -> int | None:
+                     car: CarVO) -> int | None:
  
         query_string: str = 'INSERT INTO car (car_id, model, year, type, supplier_id) VALUES (?, ?, ?, ?, ?)'
 
@@ -56,7 +87,7 @@ class CarDAO:
                                                 car.model,
                                                 car.year,
                                                 car.type,
-                                                supplier_id 
+                                                car.supplier.supplier_id 
                                            ))
         
         car_id = cursor.lastrowid

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 from sqlite3 import Cursor
 
 # Project imports
@@ -16,32 +16,126 @@ from model.peewee.Buy import Buy
 class BuyDAO:
 
     @staticmethod
-    def get_all_buys() -> List[Buy]:
-        return Buy.select()
+    def get_all_buys() -> List[BuyVO]:
+        peewee_buys = Buy.select()
+        buys = []
+        for peewee_buy in peewee_buys:
+            supplier_vo = SupplierVO(
+                supplier_id=peewee_buy.supplier_id.supplier_id,
+                name=peewee_buy.supplier_id.name,
+                email=peewee_buy.supplier_id.email,
+                phone=peewee_buy.supplier_id.phone
+            )
+            
+            car_vo = None
+            if peewee_buy.car_id is not None:
+                car_supplier = SupplierVO(
+                    supplier_id=peewee_buy.car_id.supplier_id.supplier_id,
+                    name=peewee_buy.car_id.supplier_id.name,
+                    email=peewee_buy.car_id.supplier_id.email,
+                    phone=peewee_buy.car_id.supplier_id.phone
+                )
+                car_vo = CarVO(
+                    car_id=peewee_buy.car_id.car_id,
+                    model=peewee_buy.car_id.model,
+                    year=peewee_buy.car_id.year,
+                    type=peewee_buy.car_id.type,
+                    supplier=car_supplier
+                )
+            
+            spare_vo = None
+            if peewee_buy.spare_id is not None:
+                spare_supplier = SupplierVO(
+                    supplier_id=peewee_buy.spare_id.supplier_id.supplier_id,
+                    name=peewee_buy.spare_id.supplier_id.name,
+                    email=peewee_buy.spare_id.supplier_id.email,
+                    phone=peewee_buy.spare_id.supplier_id.phone
+                )
+                spare_vo = SpareVO(
+                    spare_id=peewee_buy.spare_id.spare_id,
+                    name=peewee_buy.spare_id.name,
+                    type=peewee_buy.spare_id.type,
+                    supplier=spare_supplier
+                )
+
+            buys.append(BuyVO(
+                buy_id=peewee_buy.buy_id,
+                cost=peewee_buy.cost,
+                supplier=supplier_vo,
+                car=car_vo,
+                spare=spare_vo
+            ))
+        return buys
     
     @staticmethod
-    def get_buy(id: int) -> Buy:
-        return Buy.get_by_id(id)
+    def get_buy(id: int) -> BuyVO | None:
+        peewee_buy = Buy.get_or_none(id)
+        
+        if peewee_buy is None:
+            return None
+
+        supplier_vo = SupplierVO(
+            supplier_id=peewee_buy.supplier_id.supplier_id,
+            name=peewee_buy.supplier_id.name,
+            email=peewee_buy.supplier_id.email,
+            phone=peewee_buy.supplier_id.phone
+        )
+        
+        car_vo = None
+        if peewee_buy.car_id is not None:
+            car_supplier = SupplierVO(
+                supplier_id=peewee_buy.car_id.supplier_id.supplier_id,
+                name=peewee_buy.car_id.supplier_id.name,
+                email=peewee_buy.car_id.supplier_id.email,
+                phone=peewee_buy.car_id.supplier_id.phone
+            )
+            car_vo = CarVO(
+                car_id=peewee_buy.car_id.car_id,
+                model=peewee_buy.car_id.model,
+                year=peewee_buy.car_id.year,
+                type=peewee_buy.car_id.type,
+                supplier=car_supplier
+            )
+        
+        spare_vo = None
+        if peewee_buy.spare_id is not None:
+            spare_supplier = SupplierVO(
+                supplier_id=peewee_buy.spare_id.supplier_id.supplier_id,
+                name=peewee_buy.spare_id.supplier_id.name,
+                email=peewee_buy.spare_id.supplier_id.email,
+                phone=peewee_buy.spare_id.supplier_id.phone
+            )
+            spare_vo = SpareVO(
+                spare_id=peewee_buy.spare_id.spare_id,
+                name=peewee_buy.spare_id.name,
+                type=peewee_buy.spare_id.type,
+                supplier=spare_supplier
+            )
+
+        return BuyVO(
+            buy_id=peewee_buy.buy_id,
+            cost=peewee_buy.cost,
+            supplier=supplier_vo,
+            car=car_vo,
+            spare=spare_vo
+        )
     
     @staticmethod
-    def delete_buy(id: int) -> None:
+    def delete_buy(id: int | None) -> None:
         Buy.delete_by_id(id)
 
     @staticmethod
     def insert_buy(connection: Sqlite3Connection,
-                   buy: BuyVO,
-                   supplier_id: int,
-                   car_id: Optional[int],
-                   spare_id: Optional[int]) -> int | None:
+                   buy: BuyVO) -> int | None:
 
         query_string: str = 'INSERT INTO buy (cost, supplier_id, car_id, spare_id) VALUES (?, ?, ?, ?)'
 
         cursor: Cursor = connection.execute(query_string,
                                            (
                                                 buy.cost,
-                                                supplier_id,
-                                                car_id,
-                                                spare_id
+                                                buy.supplier.supplier_id,
+                                                buy.car.car_id if buy.car else None,
+                                                buy.spare.spare_id if buy.spare else None
                                            ))
         
         buy_id = cursor.lastrowid
@@ -49,10 +143,7 @@ class BuyDAO:
     
     @staticmethod
     def reinsert_buy(connection: Sqlite3Connection,
-                     buy: BuyVO,
-                     supplier_id: int,
-                     car_id: Optional[int],
-                     spare_id: Optional[int]) -> int | None:
+                     buy: BuyVO) -> int | None:
 
         query_string: str = 'INSERT INTO buy (buy_id, cost, supplier_id, car_id, spare_id) VALUES (?, ?, ?, ?, ?)'
 
@@ -60,9 +151,9 @@ class BuyDAO:
                                            (    
                                                 buy.buy_id,
                                                 buy.cost,
-                                                supplier_id,
-                                                car_id,
-                                                spare_id
+                                                buy.supplier.supplier_id,
+                                                buy.car.car_id if buy.car else None,
+                                                buy.spare.spare_id if buy.spare else None
                                            ))
         
         buy_id = cursor.lastrowid

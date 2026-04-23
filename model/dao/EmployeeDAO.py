@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 from sqlite3 import Cursor
 
 # Project imports
@@ -13,15 +13,34 @@ from model.peewee.Employee import Employee
 class EmployeeDAO:
 
     @staticmethod
-    def get_all_employees() -> List[Employee]:
-        return Employee.select()
+    def get_all_employees() -> List[EmployeeVO]:
+        peewee_employees = Employee.select()
+        employees = []
+        for peewee_employee in peewee_employees:
+            employees.append(EmployeeVO(
+                employee_id=peewee_employee.employee_id,
+                dni=peewee_employee.dni,
+                name=peewee_employee.name,
+                last_name=peewee_employee.last_name
+            ))
+        return employees
     
     @staticmethod
-    def get_employee(id: int) -> Employee:
-        return Employee.get_by_id(id)
+    def get_employee(id: int) -> EmployeeVO | None:
+        peewee_employee = Employee.get_or_none(id)
+        
+        if peewee_employee is None:
+            return None
+
+        return EmployeeVO(
+            employee_id=peewee_employee.employee_id,
+            dni=peewee_employee.dni,
+            name=peewee_employee.name,
+            last_name=peewee_employee.last_name
+        )
     
     @staticmethod
-    def delete_employee(id: int) -> None:
+    def delete_employee(id: int | None) -> None:
         Employee.delete_by_id(id)
 
     @staticmethod

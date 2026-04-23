@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 from sqlite3 import Cursor
 
 # Project imports
@@ -18,34 +18,143 @@ from model.peewee.Sale import Sale
 class SaleDAO:
 
     @staticmethod
-    def get_all_sales() -> List[Sale]:
-        return Sale.select()
+    def get_all_sales() -> List[SaleVO]:
+        peewee_sales = Sale.select()
+        sales = []
+        for peewee_sale in peewee_sales:
+            customer_vo = CustomerVO(
+                customer_id=peewee_sale.customer_id.customer_id,
+                dni=peewee_sale.customer_id.dni,
+                name=peewee_sale.customer_id.name,
+                last_name=peewee_sale.customer_id.last_name
+            )
+            
+            employee_vo = EmployeeVO(
+                employee_id=peewee_sale.employee_id.employee_id,
+                dni=peewee_sale.employee_id.dni,
+                name=peewee_sale.employee_id.name,
+                last_name=peewee_sale.employee_id.last_name
+            )
+
+            car_vo = None
+            if peewee_sale.car_id is not None:
+                car_supplier = SupplierVO(
+                    supplier_id=peewee_sale.car_id.supplier_id.supplier_id,
+                    name=peewee_sale.car_id.supplier_id.name,
+                    email=peewee_sale.car_id.supplier_id.email,
+                    phone=peewee_sale.car_id.supplier_id.phone
+                )
+                car_vo = CarVO(
+                    car_id=peewee_sale.car_id.car_id,
+                    model=peewee_sale.car_id.model,
+                    year=peewee_sale.car_id.year,
+                    type=peewee_sale.car_id.type,
+                    supplier=car_supplier
+                )
+            
+            spare_vo = None
+            if peewee_sale.spare_id is not None:
+                spare_supplier = SupplierVO(
+                    supplier_id=peewee_sale.spare_id.supplier_id.supplier_id,
+                    name=peewee_sale.spare_id.supplier_id.name,
+                    email=peewee_sale.spare_id.supplier_id.email,
+                    phone=peewee_sale.spare_id.supplier_id.phone
+                )
+                spare_vo = SpareVO(
+                    spare_id=peewee_sale.spare_id.spare_id,
+                    name=peewee_sale.spare_id.name,
+                    type=peewee_sale.spare_id.type,
+                    supplier=spare_supplier
+                )
+
+            sales.append(SaleVO(
+                sale_id=peewee_sale.sale_id,
+                value=peewee_sale.value,
+                customer=customer_vo,
+                car=car_vo,
+                spare=spare_vo,
+                employee=employee_vo
+            ))
+        return sales
     
     @staticmethod
-    def get_sale(id: int) -> Sale:
-        return Sale.get_by_id(id)
+    def get_sale(id: int) -> SaleVO | None:
+        peewee_sale = Sale.get_or_none(id)
+        
+        if peewee_sale is None:
+            return None
+
+        customer_vo = CustomerVO(
+            customer_id=peewee_sale.customer_id.customer_id,
+            dni=peewee_sale.customer_id.dni,
+            name=peewee_sale.customer_id.name,
+            last_name=peewee_sale.customer_id.last_name
+        )
+        
+        employee_vo = EmployeeVO(
+            employee_id=peewee_sale.employee_id.employee_id,
+            dni=peewee_sale.employee_id.dni,
+            name=peewee_sale.employee_id.name,
+            last_name=peewee_sale.employee_id.last_name
+        )
+
+        car_vo = None
+        if peewee_sale.car_id is not None:
+            car_supplier = SupplierVO(
+                supplier_id=peewee_sale.car_id.supplier_id.supplier_id,
+                name=peewee_sale.car_id.supplier_id.name,
+                email=peewee_sale.car_id.supplier_id.email,
+                phone=peewee_sale.car_id.supplier_id.phone
+            )
+            car_vo = CarVO(
+                car_id=peewee_sale.car_id.car_id,
+                model=peewee_sale.car_id.model,
+                year=peewee_sale.car_id.year,
+                type=peewee_sale.car_id.type,
+                supplier=car_supplier
+            )
+        
+        spare_vo = None
+        if peewee_sale.spare_id is not None:
+            spare_supplier = SupplierVO(
+                supplier_id=peewee_sale.spare_id.supplier_id.supplier_id,
+                name=peewee_sale.spare_id.supplier_id.name,
+                email=peewee_sale.spare_id.supplier_id.email,
+                phone=peewee_sale.spare_id.supplier_id.phone
+            )
+            spare_vo = SpareVO(
+                spare_id=peewee_sale.spare_id.spare_id,
+                name=peewee_sale.spare_id.name,
+                type=peewee_sale.spare_id.type,
+                supplier=spare_supplier
+            )
+
+        return SaleVO(
+            sale_id=peewee_sale.sale_id,
+            value=peewee_sale.value,
+            customer=customer_vo,
+            car=car_vo,
+            spare=spare_vo,
+            employee=employee_vo
+        )
     
     @staticmethod
-    def delete_sale(id: int) -> None:
+    def delete_sale(id: int | None) -> None:
         Sale.delete_by_id(id)
 
     @staticmethod
     def insert_sale(connection: Sqlite3Connection,
-                    sale: SaleVO,
-                    customer_id: int,
-                    car_id: Optional[int],
-                    spare_id: Optional[int],
-                    employee_id: int) -> int | None:
+                    sale: SaleVO) -> int | None:
   
         query_string: str = 'INSERT INTO sale (value, customer_id, car_id, spare_id, employee_id) VALUES (?, ?, ?, ?, ?)'
 
         cursor: Cursor = connection.execute(query_string,
                                            (
                                                 sale.value,
-                                                customer_id,
-                                                car_id,
-                                                spare_id,
-                                                employee_id
+                                                sale.customer.customer_id,
+                                                sale.car.car_id if sale.car else None,
+                                                sale.spare.spare_id if sale.spare else None,
+                                                sale.employee.employee_id if sale.employee else None
                                            ))
         
         sale_id = cursor.lastrowid
@@ -53,11 +162,7 @@ class SaleDAO:
     
     @staticmethod
     def reinsert_sale(connection: Sqlite3Connection,
-                      sale: SaleVO,
-                      customer_id: int,
-                      car_id: Optional[int],
-                      spare_id: Optional[int],
-                      employee_id: int) -> int | None:
+                      sale: SaleVO) -> int | None:
   
         query_string: str = 'INSERT INTO sale (sale_id, value, customer_id, car_id, spare_id, employee_id) VALUES (?, ?, ?, ?, ?, ?)'
 
@@ -65,10 +170,10 @@ class SaleDAO:
                                            (    
                                                 sale.sale_id,
                                                 sale.value,
-                                                customer_id,
-                                                car_id,
-                                                spare_id,
-                                                employee_id
+                                                sale.customer.customer_id,
+                                                sale.car.car_id if sale.car else None,
+                                                sale.spare.spare_id if sale.spare else None,
+                                                sale.employee.employee_id if sale.employee else None
                                            ))
         
         sale_id = cursor.lastrowid

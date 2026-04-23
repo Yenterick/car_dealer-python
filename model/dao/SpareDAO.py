@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 from sqlite3 import Cursor
 
 # Project imports
@@ -14,21 +14,51 @@ from model.peewee.Spare import Spare
 class SpareDAO:
 
     @staticmethod
-    def get_all_spares() -> List[Spare]:
-        return Spare.select()
+    def get_all_spares() -> List[SpareVO]:
+        peewee_spares = Spare.select()
+        spares = []
+        for peewee_spare in peewee_spares:
+            supplier_vo = SupplierVO(
+                supplier_id=peewee_spare.supplier_id.supplier_id,
+                name=peewee_spare.supplier_id.name,
+                email=peewee_spare.supplier_id.email,
+                phone=peewee_spare.supplier_id.phone
+            )
+            spares.append(SpareVO(
+                spare_id=peewee_spare.spare_id,
+                name=peewee_spare.name,
+                type=peewee_spare.type,
+                supplier=supplier_vo
+            ))
+        return spares
     
     @staticmethod
-    def get_spare(id: int) -> Spare:
-        return Spare.get_by_id(id)
+    def get_spare(id: int) -> SpareVO | None:
+        peewee_spare = Spare.get_or_none(id)
+        
+        if peewee_spare is None:
+            return None
+
+        supplier_vo = SupplierVO(
+            supplier_id=peewee_spare.supplier_id.supplier_id,
+            name=peewee_spare.supplier_id.name,
+            email=peewee_spare.supplier_id.email,
+            phone=peewee_spare.supplier_id.phone
+        )
+        return SpareVO(
+            spare_id=peewee_spare.spare_id,
+            name=peewee_spare.name,
+            type=peewee_spare.type,
+            supplier=supplier_vo
+        )
     
     @staticmethod
-    def delete_spare(id: int) -> None:
+    def delete_spare(id: int | None) -> None:
         Spare.delete_by_id(id)
 
     @staticmethod
     def insert_spare(connection: Sqlite3Connection,
-                     spare: SpareVO,
-                     supplier_id: int) -> int | None:
+                     spare: SpareVO) -> int | None:
 
         query_string: str = 'INSERT INTO spare (name, type, supplier_id) VALUES (?, ?, ?)'
 
@@ -36,7 +66,7 @@ class SpareDAO:
                                            (
                                                 spare.name,
                                                 spare.type,
-                                                supplier_id
+                                                spare.supplier.supplier_id
                                            ))
         
         spare_id = cursor.lastrowid
@@ -44,8 +74,7 @@ class SpareDAO:
     
     @staticmethod
     def reinsert_spare(connection: Sqlite3Connection,
-                       spare: SpareVO,
-                       supplier_id: int) -> int | None:
+                       spare: SpareVO) -> int | None:
 
         query_string: str = 'INSERT INTO spare (spare_id, name, type, supplier_id) VALUES (?, ?, ?, ?)'
 
@@ -54,7 +83,7 @@ class SpareDAO:
                                                 spare.spare_id,
                                                 spare.name,
                                                 spare.type,
-                                                supplier_id
+                                                spare.supplier.supplier_id
                                            ))
         
         spare_id = cursor.lastrowid
