@@ -1,5 +1,5 @@
 from typing import Optional, List
-from sqlite3 import Cursor, Connection
+from sqlite3 import Cursor
 
 # Project imports
 from db.Sqlite3Connection import Sqlite3Connection
