@@ -27,7 +27,7 @@ class EmployeeDAO:
                 last_name=peewee_employee.last_name
             )
 
-            employee._sales_loader = lambda f=connection, e_id=peewee_employee.employee_id: SaleDAO.select_all_employee_sales(f, e_id) # type: ignore
+            employee._sales_loader = lambda f=connection, e_id=peewee_employee.employee_id: SaleDAO.select_all_employee_sales(f, e_id)
             employees.append(employee)
         return employees
     

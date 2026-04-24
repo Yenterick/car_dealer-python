@@ -54,8 +54,6 @@ class CarDAO:
             supplier=supplier_vo
         )
 
-
-    
     @staticmethod
     def delete_car(id: int | None) -> None:
         Car.delete_by_id(id)
