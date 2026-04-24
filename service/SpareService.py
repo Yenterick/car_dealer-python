@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 # Project imports
 from db.Sqlite3Connection import Sqlite3Connection
@@ -15,9 +15,9 @@ from ui.consoleUtils import log
 class SpareService:
 
     def __init__(self, 
-                 connection: Sqlite3Connection,
+                 connection_factory: Callable[[], Sqlite3Connection],
                  undo_manager: UndoRedoManager):
-        self.connection = connection
+        self.connection_factory = connection_factory
         self.undo_manager = undo_manager
 
     def get_all_spares(self) -> List[SpareVO]:
@@ -27,14 +27,15 @@ class SpareService:
         return SpareDAO.get_spare(spare_id)
 
     def select_all_supplier_spares(self, supplier_id: int) -> List[SpareVO] | None:
-        return SpareDAO.select_all_supplier_spares(self.connection, supplier_id)
+        with self.connection_factory() as connection:
+            return SpareDAO.select_all_supplier_spares(connection, supplier_id)
 
     def insert_spare(self, 
                      spare: SpareVO):
         command = InsertSpare(spare)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.register(command)
 
@@ -42,9 +43,7 @@ class SpareService:
                      spare: SpareVO) -> None:
         command = DeleteSpare(spare)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.push_redo(command)
-
-

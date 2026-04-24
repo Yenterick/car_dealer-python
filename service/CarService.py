@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 # Project imports
 from db.Sqlite3Connection import Sqlite3Connection
@@ -15,9 +15,9 @@ from ui.consoleUtils import log
 class CarService:
 
     def __init__(self, 
-                 connection: Sqlite3Connection,
+                 connection_factory: Callable[[], Sqlite3Connection],
                  undo_manager: UndoRedoManager):
-        self.connection = connection
+        self.connection_factory = connection_factory
         self.undo_manager = undo_manager
 
     def get_all_cars(self) -> List[CarVO]:
@@ -27,14 +27,15 @@ class CarService:
         return CarDAO.get_car(car_id)
 
     def select_all_supplier_cars(self, supplier_id: int) -> List[CarVO] | None:
-        return CarDAO.select_all_supplier_cars(self.connection, supplier_id)
+        with self.connection_factory() as connection:
+            return CarDAO.select_all_supplier_cars(connection, supplier_id)
 
     def insert_car(self, 
                    car: CarVO):
         command = InsertCar(car)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.register(command)
 
@@ -42,8 +43,8 @@ class CarService:
                    car: CarVO) -> None:
         command = DeleteCar(car)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.push_redo(command)
 

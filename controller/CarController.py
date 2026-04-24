@@ -39,13 +39,11 @@ class CarController:
                 supplier=supplier
             )
             self.car_service.insert_car(car)
-            log("Car inserted correctly.")
         except Exception as e:
             log(f"Error occurred -> {str(e)}")
 
     def delete_car(self, car: CarVO) -> None:
         try:
             self.car_service.delete_car(car)
-            log("Car deleted correctly.")
         except Exception as e:
             log(f"Error occurred -> {str(e)}")

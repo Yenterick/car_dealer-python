@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 # Project imports
 from db.Sqlite3Connection import Sqlite3Connection
@@ -15,9 +15,9 @@ from ui.consoleUtils import log
 class BuyService:
 
     def __init__(self, 
-                 connection: Sqlite3Connection,
+                 connection_factory: Callable[[], Sqlite3Connection],
                  undo_manager: UndoRedoManager):
-        self.connection = connection
+        self.connection_factory = connection_factory
         self.undo_manager = undo_manager
 
     def get_all_buys(self) -> List[BuyVO]:
@@ -27,14 +27,15 @@ class BuyService:
         return BuyDAO.get_buy(buy_id)
 
     def select_all_supplier_buys(self, supplier_id: int) -> List[BuyVO] | None:
-        return BuyDAO.select_all_supplier_buys(self.connection, supplier_id)
+        with self.connection_factory() as connection:
+            return BuyDAO.select_all_supplier_buys(connection, supplier_id)
 
     def insert_buy(self, 
                    buy: BuyVO):
         command = InsertBuy(buy)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.register(command)
 
@@ -42,8 +43,8 @@ class BuyService:
                    buy: BuyVO) -> None:
         command = DeleteBuy(buy)
 
-        with self.connection:
-            command.redo(self.connection)
+        with self.connection_factory() as connection:
+            command.redo(connection)
 
         self.undo_manager.push_redo(command)
 

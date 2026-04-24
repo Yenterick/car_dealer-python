@@ -8,7 +8,7 @@ from model.peewee.Customer import Customer
 from model.peewee.Employee import Employee
 
 class Sale(BaseModel):
-    sale_id = IntegerField()
+    sale_id = AutoField()
     value = FloatField()
 
     customer_id = ForeignKeyField(Customer, backref='customer_id')

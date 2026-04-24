@@ -1,0 +1,64 @@
+-- DDL
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS supplier (
+    supplier_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    phone VARCHAR(40) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS spare (
+    spare_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(40) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    supplier_id INTEGER NOT NULL REFERENCES supplier(supplier_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS car (
+    car_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    model VARCHAR(40) NOT NULL,
+    year INTEGER NOT NULL,
+    type VARCHAR(40) NOT NULL,
+    supplier_id INTEGER NOT NULL REFERENCES supplier(supplier_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS buy (
+    buy_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cost REAL NOT NULL,
+    supplier_id INTEGER NOT NULL REFERENCES supplier(supplier_id),
+    car_id INTEGER REFERENCES car(car_id),
+    spare_id INTEGER REFERENCES spare(spare_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS customer (
+    customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dni VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    last_name VARCHAR(40) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS employee (
+    employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dni VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    last_name VARCHAR(40) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sale (
+    sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    value REAL NOT NULL,
+    customer_id INTEGER NOT NULL REFERENCES customer(customer_id),
+    employee_id INTEGER NOT NULL REFERENCES employee(employee_id),
+    car_id INTEGER REFERENCES car(car_id),
+    spare_id INTEGER REFERENCES spare(spare_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- DML

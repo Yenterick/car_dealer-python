@@ -13,13 +13,13 @@ class Sqlite3Connection:
         self.connection: Connection | None = None
 
     # What it will do when being loaded with "with"
-    def __enter__(self) -> Connection:
+    def __enter__(self) -> 'Sqlite3Connection':
         self.connection = sqlite3.connect(self.db_path)
         self.connection.row_factory = sqlite3.Row
 
         log("Connection opened...")
 
-        return self.connection
+        return self
     
     # What it will do when the contexts ends or when it gets an exceptions
     def __exit__(self, exec_type, exec, traceback) -> bool | None:
