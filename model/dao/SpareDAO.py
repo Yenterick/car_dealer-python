@@ -51,6 +51,8 @@ class SpareDAO:
             type=peewee_spare.type,
             supplier=supplier_vo
         )
+
+
     
     @staticmethod
     def delete_spare(id: int | None) -> None:
@@ -91,7 +93,7 @@ class SpareDAO:
     
     @staticmethod
     def select_all_supplier_spares(connection: Sqlite3Connection,
-                                   supplier_id: int) -> List[SpareVO] | None:
+                                   supplier_id: int) -> List[SpareVO]:
         
         query_string: str = '''
             SELECT  sp.spare_id,

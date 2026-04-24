@@ -10,23 +10,30 @@ from model.vo.CustomerVO import CustomerVO
 # Peewee VOs
 from model.peewee.Customer import Customer
 
+# DAOs for lazy loading
+from model.dao.SaleDAO import SaleDAO
+
 class CustomerDAO:
 
     @staticmethod
-    def get_all_customers() -> List[CustomerVO]:
+    def get_all_customers(connection: Sqlite3Connection) -> List[CustomerVO]:
         peewee_customers = Customer.select()
         customers = []
+
         for peewee_customer in peewee_customers:
-            customers.append(CustomerVO(
+            customer = CustomerVO(
                 customer_id=peewee_customer.customer_id,
                 dni=peewee_customer.dni,
                 name=peewee_customer.name,
                 last_name=peewee_customer.last_name
-            ))
+            )
+
+            customer._sales_loader = lambda f=connection, c_id=peewee_customer.customer_id: SaleDAO.select_all_customer_sales(f, c_id)
+            customers.append(customer)
         return customers
     
     @staticmethod
-    def get_customer(id: int) -> CustomerVO | None:
+    def get_customer(connection: Sqlite3Connection, id: int) -> CustomerVO | None:
         peewee_customer = Customer.get_or_none(id)
         
         if peewee_customer is None:
@@ -36,7 +43,8 @@ class CustomerDAO:
             customer_id=peewee_customer.customer_id,
             dni=peewee_customer.dni,
             name=peewee_customer.name,
-            last_name=peewee_customer.last_name
+            last_name=peewee_customer.last_name,
+            _sales_loader=lambda: SaleDAO.select_all_customer_sales(connection, peewee_customer.customer_id)
         )
     
     @staticmethod

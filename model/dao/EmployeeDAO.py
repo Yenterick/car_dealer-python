@@ -10,23 +10,29 @@ from model.vo.EmployeeVO import EmployeeVO
 # Peewee VOs
 from model.peewee.Employee import Employee
 
+# DAOs for lazy loading
+from model.dao.SaleDAO import SaleDAO
+
 class EmployeeDAO:
 
     @staticmethod
-    def get_all_employees() -> List[EmployeeVO]:
+    def get_all_employees(connection: Sqlite3Connection) -> List[EmployeeVO]:
         peewee_employees = Employee.select()
         employees = []
         for peewee_employee in peewee_employees:
-            employees.append(EmployeeVO(
+            employee = EmployeeVO(
                 employee_id=peewee_employee.employee_id,
                 dni=peewee_employee.dni,
                 name=peewee_employee.name,
                 last_name=peewee_employee.last_name
-            ))
+            )
+
+            employee._sales_loader = lambda f=connection, e_id=peewee_employee.employee_id: SaleDAO.select_all_employee_sales(f, e_id) # type: ignore
+            employees.append(employee)
         return employees
     
     @staticmethod
-    def get_employee(id: int) -> EmployeeVO | None:
+    def get_employee(connection: Sqlite3Connection, id: int) -> EmployeeVO | None:
         peewee_employee = Employee.get_or_none(id)
         
         if peewee_employee is None:
@@ -36,7 +42,8 @@ class EmployeeDAO:
             employee_id=peewee_employee.employee_id,
             dni=peewee_employee.dni,
             name=peewee_employee.name,
-            last_name=peewee_employee.last_name
+            last_name=peewee_employee.last_name,
+            _sales_loader=lambda: SaleDAO.select_all_employee_sales(connection, peewee_employee.employee_id)
         )
     
     @staticmethod

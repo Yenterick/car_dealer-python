@@ -53,6 +53,8 @@ class CarDAO:
             type=peewee_car.type,
             supplier=supplier_vo
         )
+
+
     
     @staticmethod
     def delete_car(id: int | None) -> None:
@@ -95,7 +97,7 @@ class CarDAO:
     
     @staticmethod
     def select_all_supplier_cars(connection: Sqlite3Connection,
-                                 supplier_id: int) -> List[CarVO] | None:
+                                 supplier_id: int) -> List[CarVO]:
         
         query_string: str = '''
             SELECT  c.car_id,

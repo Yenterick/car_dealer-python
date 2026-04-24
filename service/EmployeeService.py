@@ -21,10 +21,12 @@ class EmployeeService:
         self.undo_manager = undo_manager
 
     def get_all_employees(self) -> List[EmployeeVO]:
-        return EmployeeDAO.get_all_employees()
+        with self.connection_factory() as connection:
+            return EmployeeDAO.get_all_employees(connection)
     
     def get_employee(self, employee_id: int) -> EmployeeVO | None:
-        return EmployeeDAO.get_employee(employee_id)
+        with self.connection_factory() as connection:
+            return EmployeeDAO.get_employee(connection, employee_id)
 
     def insert_employee(self, 
                         employee: EmployeeVO):

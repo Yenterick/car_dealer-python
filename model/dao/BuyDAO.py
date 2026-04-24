@@ -161,7 +161,7 @@ class BuyDAO:
     
     @staticmethod
     def select_all_supplier_buys(connection: Sqlite3Connection,
-                                 supplier_id: int) -> List[BuyVO] | None:
+                                 supplier_id: int) -> List[BuyVO]:
         
         query_string: str = '''
             SELECT  b.buy_id,

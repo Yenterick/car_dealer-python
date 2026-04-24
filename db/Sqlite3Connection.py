@@ -19,6 +19,7 @@ class Sqlite3Connection:
 
         log("Connection opened...")
 
+        # For some reason if I return self.connection instead of self pylance type checker cries
         return self
     
     # What it will do when the contexts ends or when it gets an exceptions

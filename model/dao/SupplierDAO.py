@@ -10,23 +10,35 @@ from model.vo.SupplierVO import SupplierVO
 # Peewee VOs
 from model.peewee.Supplier import Supplier
 
+# DAOs for lazy loading
+from model.dao.BuyDAO import BuyDAO
+from model.dao.CarDAO import CarDAO
+from model.dao.SpareDAO import SpareDAO
+
 class SupplierDAO:
 
     @staticmethod
-    def get_all_suppliers() -> List[SupplierVO]:
+    def get_all_suppliers(connection: Sqlite3Connection) -> List[SupplierVO]:
         peewee_suppliers = Supplier.select()
         suppliers = []
+
         for peewee_supplier in peewee_suppliers:
-            suppliers.append(SupplierVO(
+            supplier = SupplierVO(
                 supplier_id=peewee_supplier.supplier_id,
                 name=peewee_supplier.name,
                 email=peewee_supplier.email,
                 phone=peewee_supplier.phone
-            ))
+            )
+
+            supplier._buys_loader = lambda f=connection, s_id=peewee_supplier.supplier_id: BuyDAO.select_all_supplier_buys(f, s_id)
+            supplier._cars_loader = lambda f=connection, s_id=peewee_supplier.supplier_id: CarDAO.select_all_supplier_cars(f, s_id)
+            supplier._spares_loader = lambda f=connection, s_id=peewee_supplier.supplier_id: SpareDAO.select_all_supplier_spares(f, s_id)
+
+            suppliers.append(supplier)
         return suppliers
     
     @staticmethod
-    def get_supplier(id: int) -> SupplierVO | None:
+    def get_supplier(connection: Sqlite3Connection, id: int) -> SupplierVO | None:
         peewee_supplier = Supplier.get_or_none(id)
         
         if peewee_supplier is None:
@@ -36,7 +48,10 @@ class SupplierDAO:
             supplier_id=peewee_supplier.supplier_id,
             name=peewee_supplier.name,
             email=peewee_supplier.email,
-            phone=peewee_supplier.phone
+            phone=peewee_supplier.phone,
+            _buys_loader=lambda: BuyDAO.select_all_supplier_buys(connection, peewee_supplier.supplier_id),
+            _cars_loader=lambda: CarDAO.select_all_supplier_cars(connection, peewee_supplier.supplier_id),
+            _spares_loader=lambda: SpareDAO.select_all_supplier_spares(connection, peewee_supplier.supplier_id)
         )
     
     @staticmethod

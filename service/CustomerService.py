@@ -21,10 +21,12 @@ class CustomerService:
         self.undo_manager = undo_manager
 
     def get_all_customers(self) -> List[CustomerVO]:
-        return CustomerDAO.get_all_customers()
+        with self.connection_factory() as connection:
+            return CustomerDAO.get_all_customers(connection)
     
     def get_customer(self, customer_id: int) -> CustomerVO | None:
-        return CustomerDAO.get_customer(customer_id)
+        with self.connection_factory() as connection:
+            return CustomerDAO.get_customer(connection, customer_id)
 
     def insert_customer(self, 
                         customer: CustomerVO):

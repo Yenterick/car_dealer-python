@@ -21,10 +21,12 @@ class SupplierService:
         self.undo_manager = undo_manager
 
     def get_all_suppliers(self) -> List[SupplierVO]:
-        return SupplierDAO.get_all_suppliers()
+        with self.connection_factory() as connection:
+            return SupplierDAO.get_all_suppliers(connection)
     
     def get_supplier(self, supplier_id: int) -> SupplierVO | None:
-        return SupplierDAO.get_supplier(supplier_id)
+        with self.connection_factory() as connection:
+            return SupplierDAO.get_supplier(connection, supplier_id)
 
     def insert_supplier(self, 
                         supplier: SupplierVO):
