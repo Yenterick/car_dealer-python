@@ -69,11 +69,11 @@ class SaleDAO:
 
             sales.append(SaleVO(
                 sale_id=peewee_sale.sale_id,
-                value=peewee_sale.value,
                 customer=customer_vo,
+                employee=employee_vo,
                 car=car_vo,
                 spare=spare_vo,
-                employee=employee_vo
+                value=peewee_sale.value
             ))
         return sales
     
@@ -131,11 +131,11 @@ class SaleDAO:
 
         return SaleVO(
             sale_id=peewee_sale.sale_id,
-            value=peewee_sale.value,
             customer=customer_vo,
+            employee=employee_vo,
             car=car_vo,
             spare=spare_vo,
-            employee=employee_vo
+            value=peewee_sale.value
         )
 
 
@@ -147,39 +147,27 @@ class SaleDAO:
     @staticmethod
     def insert_sale(connection: Sqlite3Connection,
                     sale: SaleVO) -> int | None:
-  
-        query_string: str = 'INSERT INTO sale (value, customer_id, car_id, spare_id, employee_id) VALUES (?, ?, ?, ?, ?)'
-
-        cursor: Cursor = connection.execute(query_string,
-                                           (
-                                                sale.value,
-                                                sale.customer.customer_id,
-                                                sale.car.car_id if sale.car else None,
-                                                sale.spare.spare_id if sale.spare else None,
-                                                sale.employee.employee_id if sale.employee else None
-                                           ))
-        
-        sale_id = cursor.lastrowid
-        return sale_id
+        peewee_sale = Sale.create(
+            value=sale.value,
+            customer_id=sale.customer.customer_id,
+            employee_id=sale.employee.employee_id,
+            car_id=sale.car.car_id if sale.car else None,
+            spare_id=sale.spare.spare_id if sale.spare else None
+        )
+        return peewee_sale.sale_id
     
     @staticmethod
     def reinsert_sale(connection: Sqlite3Connection,
                       sale: SaleVO) -> int | None:
-  
-        query_string: str = 'INSERT INTO sale (sale_id, value, customer_id, car_id, spare_id, employee_id) VALUES (?, ?, ?, ?, ?, ?)'
-
-        cursor: Cursor = connection.execute(query_string,
-                                           (    
-                                                sale.sale_id,
-                                                sale.value,
-                                                sale.customer.customer_id,
-                                                sale.car.car_id if sale.car else None,
-                                                sale.spare.spare_id if sale.spare else None,
-                                                sale.employee.employee_id if sale.employee else None
-                                           ))
-        
-        sale_id = cursor.lastrowid
-        return sale_id
+        peewee_sale = Sale.insert(
+            sale_id=sale.sale_id,
+            value=sale.value,
+            customer_id=sale.customer.customer_id,
+            employee_id=sale.employee.employee_id,
+            car_id=sale.car.car_id if sale.car else None,
+            spare_id=sale.spare.spare_id if sale.spare else None
+        ).execute()
+        return sale.sale_id
 
     @staticmethod
     def select_all_customer_sales(connection: Sqlite3Connection,
@@ -332,7 +320,7 @@ class SaleDAO:
         
         cursor: Cursor = connection.execute(query_string,
                                             (
-                                                employee_id
+                                                employee_id,
                                             ))
         
         employee_sales: List[SaleVO] = []

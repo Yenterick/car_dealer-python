@@ -20,6 +20,8 @@ class InsertBuy(Command):
                 connection,
                 self.buy
             )
+            # Update the VO with the new ID
+            self.buy.buy_id = self.buy_id
         else:
             # We're reinserting the buy
             BuyDAO.reinsert_buy(

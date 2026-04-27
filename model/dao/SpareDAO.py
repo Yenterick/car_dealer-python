@@ -110,7 +110,7 @@ class SpareDAO:
         
         cursor: Cursor = connection.execute(query_string,
                                             (
-                                                supplier_id
+                                                supplier_id,
                                             ))
         
         supplier_spares: List[SpareVO] = []

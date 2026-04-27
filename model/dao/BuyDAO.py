@@ -60,10 +60,10 @@ class BuyDAO:
 
             buys.append(BuyVO(
                 buy_id=peewee_buy.buy_id,
-                cost=peewee_buy.cost,
                 supplier=supplier_vo,
                 car=car_vo,
-                spare=spare_vo
+                spare=spare_vo,
+                cost=peewee_buy.cost
             ))
         return buys
     
@@ -114,50 +114,39 @@ class BuyDAO:
 
         return BuyVO(
             buy_id=peewee_buy.buy_id,
-            cost=peewee_buy.cost,
             supplier=supplier_vo,
             car=car_vo,
-            spare=spare_vo
+            spare=spare_vo,
+            cost=peewee_buy.cost
         )
     
     @staticmethod
     def delete_buy(id: int | None) -> None:
-        Buy.delete_by_id(id)
+        if id is not None:
+            Buy.delete_by_id(id)
 
     @staticmethod
     def insert_buy(connection: Sqlite3Connection,
                    buy: BuyVO) -> int | None:
+        peewee_buy = Buy.create(
+            cost=buy.cost,
+            supplier_id=buy.supplier.supplier_id if buy.supplier else None,
+            car_id=buy.car.car_id if buy.car else None,
+            spare_id=buy.spare.spare_id if buy.spare else None
+        )
+        return peewee_buy.buy_id
 
-        query_string: str = 'INSERT INTO buy (cost, supplier_id, car_id, spare_id) VALUES (?, ?, ?, ?)'
-
-        cursor: Cursor = connection.execute(query_string,
-                                           (
-                                                buy.cost,
-                                                buy.supplier.supplier_id,
-                                                buy.car.car_id if buy.car else None,
-                                                buy.spare.spare_id if buy.spare else None
-                                           ))
-        
-        buy_id = cursor.lastrowid
-        return buy_id
-    
     @staticmethod
     def reinsert_buy(connection: Sqlite3Connection,
                      buy: BuyVO) -> int | None:
-
-        query_string: str = 'INSERT INTO buy (buy_id, cost, supplier_id, car_id, spare_id) VALUES (?, ?, ?, ?, ?)'
-
-        cursor: Cursor = connection.execute(query_string,
-                                           (    
-                                                buy.buy_id,
-                                                buy.cost,
-                                                buy.supplier.supplier_id,
-                                                buy.car.car_id if buy.car else None,
-                                                buy.spare.spare_id if buy.spare else None
-                                           ))
-        
-        buy_id = cursor.lastrowid
-        return buy_id
+        Buy.insert(
+            buy_id=buy.buy_id,
+            cost=buy.cost,
+            supplier_id=buy.supplier.supplier_id if buy.supplier else None,
+            car_id=buy.car.car_id if buy.car else None,
+            spare_id=buy.spare.spare_id if buy.spare else None
+        ).execute()
+        return buy.buy_id
     
     @staticmethod
     def select_all_supplier_buys(connection: Sqlite3Connection,
@@ -186,7 +175,7 @@ class BuyDAO:
         
         cursor: Cursor = connection.execute(query_string,
                                             (
-                                                supplier_id
+                                                supplier_id,
                                             ))
         
         supplier_buys: List[BuyVO] = []

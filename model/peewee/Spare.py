@@ -9,4 +9,4 @@ class Spare(BaseModel):
     name = CharField()
     type = CharField()
     
-    supplier_id = ForeignKeyField(Supplier, backref='supplier_id')
+    supplier_id = ForeignKeyField(Supplier, column_name='supplier_id', backref='supplier_id')

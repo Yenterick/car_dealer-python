@@ -20,6 +20,8 @@ class InsertSale(Command):
                 connection,
                 self.sale
             )
+            # Update the VO with the new ID
+            self.sale.sale_id = self.sale_id
         else:
             # We're reinserting the sale
             SaleDAO.reinsert_sale(

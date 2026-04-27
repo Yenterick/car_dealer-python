@@ -56,7 +56,8 @@ class CarDAO:
 
     @staticmethod
     def delete_car(id: int | None) -> None:
-        Car.delete_by_id(id)
+        if id is not None:
+            Car.delete_by_id(id)
 
     @staticmethod
     def insert_car(connection: Sqlite3Connection,
@@ -113,7 +114,7 @@ class CarDAO:
         
         cursor: Cursor = connection.execute(query_string,
                                             (
-                                                supplier_id
+                                                supplier_id,
                                             ))
         
         supplier_cars: List[CarVO] = []

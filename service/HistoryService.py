@@ -35,3 +35,20 @@ class HistoryService:
             command.redo(connection)
 
         self.undo_manager.push_undo(command)
+
+    def get_history(self) -> list:
+        """Returns a list of operations from the undo/redo stacks"""
+        history = []
+        # Operations that can be undone
+        for cmd in reversed(self.undo_manager.undo_stack):
+            history.append({
+                'operation': cmd.__class__.__name__.replace('Insert', 'Added ').replace('Delete', 'Removed '),
+                'status': 'Done'
+            })
+        # Operations that can be redone
+        for cmd in reversed(self.undo_manager.redo_stack):
+            history.append({
+                'operation': cmd.__class__.__name__.replace('Insert', 'Added ').replace('Delete', 'Removed '),
+                'status': 'Undone'
+            })
+        return history
