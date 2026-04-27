@@ -20,6 +20,8 @@ class InsertSupplier(Command):
                 connection,
                 self.supplier
             )
+            # Update the VO with the new ID
+            self.supplier.supplier_id = self.supplier_id
         else:
             # We're reinserting the supplier
             SupplierDAO.reinsert_supplier(

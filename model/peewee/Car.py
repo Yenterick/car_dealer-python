@@ -10,4 +10,4 @@ class Car(BaseModel):
     year = IntegerField()
     type = CharField()
     
-    supplier_id = ForeignKeyField(Supplier, column_name='supplier_id', backref='supplier_id')
+    supplier_id = ForeignKeyField(Supplier, column_name='supplier_id', backref='cars')

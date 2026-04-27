@@ -20,6 +20,8 @@ class InsertCustomer(Command):
                 connection,
                 self.customer
             )
+            # Update the VO with the new ID
+            self.customer.customer_id = self.customer_id
         else:
             # We're reinserting the customer
             CustomerDAO.reinsert_customer(

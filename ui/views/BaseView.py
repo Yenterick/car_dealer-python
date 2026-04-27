@@ -40,17 +40,17 @@ class BaseView(QWidget, metaclass=ABCQWidgetMeta):
         self.button_layout = QHBoxLayout()
         
         self.add_button = QPushButton("➕ Add")
-        self.edit_button = QPushButton("✏️ Edit")
+        # self.edit_button = QPushButton("✏️ Edit")
         self.delete_button = QPushButton("🗑️ Delete")
         self.refresh_button = QPushButton("🔄 Refresh")
         
         self.add_button.clicked.connect(self.on_add)
-        self.edit_button.clicked.connect(self.on_edit)
+        # self.edit_button.clicked.connect(self.on_edit)
         self.delete_button.clicked.connect(self.on_delete)
         self.refresh_button.clicked.connect(self.load_data)
         
         self.button_layout.addWidget(self.add_button)
-        self.button_layout.addWidget(self.edit_button)
+        # self.button_layout.addWidget(self.edit_button)
         self.button_layout.addWidget(self.delete_button)
         self.button_layout.addStretch()
         self.button_layout.addWidget(self.refresh_button)

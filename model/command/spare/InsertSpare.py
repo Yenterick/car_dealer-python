@@ -20,6 +20,8 @@ class InsertSpare(Command):
                 connection,
                 self.spare
             )
+            # Update the VO with the new ID
+            self.spare.spare_id = self.spare_id
         else:
             # We're reinserting the spare
             SpareDAO.reinsert_spare(

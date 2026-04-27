@@ -44,6 +44,6 @@ class CustomerService:
         with self.connection_factory() as connection:
             command.redo(connection)
 
-        self.undo_manager.push_redo(command)
+        self.undo_manager.register(command)
 
 

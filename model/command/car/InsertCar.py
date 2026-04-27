@@ -20,6 +20,8 @@ class InsertCar(Command):
                 connection,
                 self.car
             )
+            # Update the VO with the new ID
+            self.car.car_id = self.car_id
         else:
             # We're reinserting the car
             CarDAO.reinsert_car(

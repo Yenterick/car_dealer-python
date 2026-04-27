@@ -20,6 +20,8 @@ class InsertEmployee(Command):
                 connection,
                 self.employee
             )
+            # Update the VO with the new ID
+            self.employee.employee_id = self.employee_id
         else:
             # We're reinserting the employee
             EmployeeDAO.reinsert_employee(

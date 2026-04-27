@@ -1,7 +1,9 @@
 
 import sys
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QIcon
 
+# Project imports
 from db.Sqlite3Connection import Sqlite3Connection
 from model.command.UndoRedoManager import UndoRedoManager
 
@@ -33,35 +35,27 @@ def connection_factory() -> Sqlite3Connection:
 def build_controllers() -> dict:
     undo_manager: UndoRedoManager = UndoRedoManager()
 
-    # Supplier
     supplier_service: SupplierService = SupplierService(connection_factory, undo_manager)
     supplier_controller: SupplierController = SupplierController(supplier_service)
 
-    # Customer
     customer_service: CustomerService = CustomerService(connection_factory, undo_manager)
     customer_controller: CustomerController = CustomerController(customer_service)
 
-    # Employee
     employee_service: EmployeeService = EmployeeService(connection_factory, undo_manager)
     employee_controller: EmployeeController = EmployeeController(employee_service)
 
-    # Spare
     spare_service: SpareService = SpareService(connection_factory, undo_manager)
     spare_controller: SpareController = SpareController(spare_service)
 
-    # Car
     car_service: CarService = CarService(connection_factory, undo_manager)
     car_controller: CarController = CarController(car_service)
 
-    # Buy
     buy_service: BuyService = BuyService(connection_factory, undo_manager)
     buy_controller: BuyController = BuyController(buy_service)
 
-    # Sale
     sale_service: SaleService = SaleService(connection_factory, undo_manager)
     sale_controller: SaleController = SaleController(sale_service)
 
-    # History
     history_service: HistoryService = HistoryService(connection_factory, undo_manager)
     history_controller: HistoryController = HistoryController(history_service)
 
@@ -81,6 +75,8 @@ def build_controllers() -> dict:
 def run():
     app = QApplication(sys.argv)
     controllers = build_controllers()
+    app_icon = QIcon('ui/assets/icon.png')
     window = MainWindow(controllers)
+    window.setWindowIcon(app_icon)
     window.show()
     sys.exit(app.exec())

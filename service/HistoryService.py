@@ -37,7 +37,6 @@ class HistoryService:
         self.undo_manager.push_undo(command)
 
     def get_history(self) -> list:
-        """Returns a list of operations from the undo/redo stacks"""
         history = []
         # Operations that can be undone
         for cmd in reversed(self.undo_manager.undo_stack):
