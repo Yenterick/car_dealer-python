@@ -18,3 +18,4 @@ Temporary Items
 *.pyc
 *.pyo
 __pycache__
+.vscode
